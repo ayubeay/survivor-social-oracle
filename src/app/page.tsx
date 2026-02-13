@@ -44,10 +44,11 @@ export default function Home() {
     setResult(null);
 
     try {
+      const isWallet = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(id);
       const res = await fetch("/api/score", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ profileId: id }),
+        body: JSON.stringify(isWallet ? { wallet: id } : { profileId: id }),
       });
 
       if (!res.ok) {
@@ -104,7 +105,7 @@ export default function Home() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleScore()}
-                placeholder="Enter Tapestry profile ID..."
+                placeholder="Enter Tapestry profile ID or Solana wallet address..."
                 className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-lg px-4 py-3 text-sm mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--accent-green)]/50 focus:ring-1 focus:ring-[var(--accent-green)]/20 transition-all"
               />
               {loading && (
