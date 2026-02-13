@@ -41,9 +41,14 @@ export function StatsPanel({
       {/* Metrics grid */}
       <div className="grid grid-cols-3 gap-4 mb-4 pb-4 border-b border-[var(--border)]">
         <Stat label="Posts" value={stats.posts} />
-        <Stat label="TXs" value={stats.transactions} />
+        <Stat label="TXs (30d)" value={stats.transactions} />
         <Stat label="Swaps" value={stats.swaps} />
       </div>
+      {stats.transactions === 0 && stats.posts > 0 && (
+        <p className="text-[10px] text-[var(--accent-amber)] mono mb-4 pb-4 border-b border-[var(--border)]">
+          No onchain txs observed for linked wallet — onchain correlation limited
+        </p>
+      )}
 
       {/* Tokens mentioned */}
       {stats.tokensmentioned.length > 0 && (

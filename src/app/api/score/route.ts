@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     const tradedSymbols = new Set<string>();
     for (const tx of swaps) {
       const s = tx.events?.swap;
-      if (s == null) continue;
+      if (s == null) { continue; }
       if (s.nativeInput) tradedSymbols.add('SOL');
       if (s.nativeOutput) tradedSymbols.add('SOL');
       if (s.tokenInputs?.[0]?.symbol) tradedSymbols.add(s.tokenInputs[0].symbol);
@@ -105,7 +105,12 @@ export async function POST(req: NextRequest) {
     if (posts.length > 0 && txs.length === 0) { score += 20; drivers.push({factor:"Engagement Authenticity",points:20,evidence:`${posts.length} social posts but zero on-chain transactions`}); } else if (posts.length > txs.length*2) { score += 10; drivers.push({factor:"Engagement Authenticity",points:10,evidence:`${posts.length} posts vs ${txs.length} transactions`}); }
     if (uT >= 6) { score += 15; drivers.push({factor:"Spam Pattern",points:15,evidence:`${uT} different tokens promoted — shotgun approach`}); }
     const overlap = [...mentions.keys()].filter(t => tradedSymbols.has(t));
-    if (overlap.length > 0) { const pts = Math.min(35, overlap.length*15); score += pts; drivers.push({factor:"Promote → Exit",points:pts,evidence:`${overlap.join(", ")} promoted AND traded on-chain`}); }
+    if (overlap.length > 0) {
+      const pts = Math.min(35, overlap.length * 15);
+      score += pts;
+      const evidence = overlap.join(", ") + " promoted in posts AND traded on-chain (" + swaps.length + " swaps detected)";
+      drivers.push({factor:"Promote \u2192 Exit",points:pts,evidence:evidence});
+    }
     score = Math.min(100, score);
     const label = score >= 75 ? "CRITICAL" : score >= 50 ? "HIGH" : score >= 25 ? "MEDIUM" : "LOW";
 
