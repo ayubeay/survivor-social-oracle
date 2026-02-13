@@ -110,7 +110,24 @@ export async function POST(req: NextRequest) {
 
     const timeline: any[] = [];
     for (const p of posts) { const text = getPostText(p); timeline.push({timestamp:p.created_at||0,type:"post",content:text,tokens:text.match(/\$([A-Z]{2,10})/g)||[]}); }
-    for (const tx of txs.slice(0,10)) { const e: any = {timestamp:(tx.timestamp||0)*1000,type:tx.type==="SWAP"?"swap":"tx",content:`${tx.type||"TX"} via ${tx.source||"unknown"}`,signature:tx.signature}; if(tx.events?.swap){const s=tx.events.swap;e.tokenIn=s.tokenInputs?.[0]?.symbol;e.tokenOut=s.tokenOutputs?.[0]?.symbol;} timeline.push(e); }
+    for (const tx of txs.slice(0,10)) {
+      const isSwap = tx.type === "SWAP" || tx.events?.swap;
+      const e: any = {
+        timestamp: (tx.timestamp || 0) * 1000,
+        type: isSwap ? "swap" : "tx",
+        content: tx.type + " via " + (tx.source || "unknown"),
+        signature: tx.signature,
+      };
+      if (tx.events?.swap) {
+        const s = tx.events.swap;
+        const inSym = s.nativeInput ? "SOL" : (s.tokenInputs?.[0]?.symbol || s.tokenInputs?.[0]?.mint?.slice(0,6) || "?");
+        const outSym = s.nativeOutput ? "SOL" : (s.tokenOutputs?.[0]?.symbol || s.tokenOutputs?.[0]?.mint?.slice(0,6) || "?");
+        e.tokenIn = inSym;
+        e.tokenOut = outSym;
+        e.content = inSym + " -> " + outSym + " via " + (tx.source || "unknown");
+      }
+      timeline.push(e);
+    }
     timeline.sort((a,b) => a.timestamp - b.timestamp);
 
     return NextResponse.json({ score, label, drivers, profile: { id:profile.id, username:profile.username, bio:profile.bio, namespace:profile.namespace, wallet }, stats: { posts:posts.length, transactions:txs.length, swaps:swaps.length, tokensmentioned:[...mentions.entries()].map(([k,v])=>({token:k,count:v})), tokensTraded:[...tradedSymbols] }, timeline });
