@@ -21,6 +21,7 @@ function generatePostIds(profileId: string): string[] {
     alpha_pumper: { prefix: "pump", count: 5 },
     solana_builder: { prefix: "build", count: 3 },
     moon_signals: { prefix: "bot", count: 8 },
+    degen_trader: { prefix: "degen", count: 4 },
   };
   const config = prefixes[profileId];
   if (!config) return [];
@@ -83,7 +84,16 @@ export async function POST(req: NextRequest) {
     for (const p of posts) { const text = getPostText(p); const tickers = text.match(/\$([A-Z]{2,10})/g) || []; tickers.forEach((t: string) => { const c = t.replace("$",""); mentions.set(c, (mentions.get(c)||0)+1); }); }
 
     const tradedSymbols = new Set<string>();
-    for (const tx of swaps) { const s = tx.events?.swap; if (s?.tokenInputs?.[0]?.symbol) tradedSymbols.add(s.tokenInputs[0].symbol); if (s?.tokenOutputs?.[0]?.symbol) tradedSymbols.add(s.tokenOutputs[0].symbol); }
+    for (const tx of swaps) {
+      const s = tx.events?.swap;
+      if (s == null) continue;
+      if (s.nativeInput) tradedSymbols.add('SOL');
+      if (s.nativeOutput) tradedSymbols.add('SOL');
+      if (s.tokenInputs?.[0]?.symbol) tradedSymbols.add(s.tokenInputs[0].symbol);
+      if (s.tokenOutputs?.[0]?.symbol) tradedSymbols.add(s.tokenOutputs[0].symbol);
+      if (s.tokenInputs?.[0]?.mint) tradedSymbols.add(s.tokenInputs[0].mint.slice(0,8));
+      if (s.tokenOutputs?.[0]?.mint) tradedSymbols.add(s.tokenOutputs[0].mint.slice(0,8));
+    }
 
     let score = 0;
     const drivers: Array<{factor:string;points:number;evidence:string}> = [];

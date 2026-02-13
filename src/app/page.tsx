@@ -6,7 +6,7 @@ import { RiskDrivers } from "@/components/RiskDrivers";
 import { Timeline } from "@/components/Timeline";
 import { StatsPanel } from "@/components/StatsPanel";
 
-const DEMO_PROFILES = ["alpha_pumper", "solana_builder", "moon_signals"];
+const DEMO_PROFILES = ["alpha_pumper", "solana_builder", "moon_signals", "degen_trader"];
 
 interface ScoreResult {
   score: number;
