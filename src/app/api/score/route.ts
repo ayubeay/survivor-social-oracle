@@ -22,6 +22,7 @@ function generatePostIds(profileId: string): string[] {
     solana_builder: { prefix: "build", count: 3 },
     moon_signals: { prefix: "bot", count: 8 },
     degen_trader: { prefix: "degen", count: 4 },
+    rug_master: { prefix: "rug", count: 13 },
   };
   const config = prefixes[profileId];
   if (!config) return [];
